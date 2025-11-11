@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+package async;
+
+service AsyncService {
+  rpc ProcessTask(TaskRequest) returns (TaskResponse) {}
+}
+
+message TaskRequest {
+  string task_id = 1;
+}
+
+message TaskResponse {
+  string task_id = 1;
+  string status = 2;
+  string result = 3;
+}
