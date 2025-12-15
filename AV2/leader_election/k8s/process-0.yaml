@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-0
+  labels:
+    app: leader-election
+    process-id: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: leader-election
+      process-id: "0"
+  template:
+    metadata:
+      labels:
+        app: leader-election
+        process-id: "0"
+    spec:
+      containers:
+        - name: process
+          image: leader-election:latest
+          imagePullPolicy: Never # Usar imagem local do Minikube
+          env:
+            - name: PROCESS_ID
+              value: "0"
+            - name: PORT
+              value: "5000"
+          ports:
+            - containerPort: 5000
+              name: http
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 3
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-0
+  labels:
+    app: leader-election
+spec:
+  selector:
+    app: leader-election
+    process-id: "0"
+  ports:
+    - port: 5000
+      targetPort: 5000
+      name: http
+  type: ClusterIP

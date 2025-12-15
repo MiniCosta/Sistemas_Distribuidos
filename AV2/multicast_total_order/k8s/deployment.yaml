@@ -1,0 +1,185 @@
+# Deployment e Service para Processo 0
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-0
+  labels:
+    app: multicast
+    process: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multicast
+      process: "0"
+  template:
+    metadata:
+      labels:
+        app: multicast
+        process: "0"
+    spec:
+      containers:
+        - name: multicast
+          image: multicast-total-order:latest
+          imagePullPolicy: Never # Para usar imagem local do Minikube
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PROCESS_ID
+              value: "0"
+            - name: PORT
+              value: "5000"
+            - name: NUM_PROCESSES
+              value: "3"
+            - name: DELAY_MODE
+              value: "false"
+            - name: PROCESS_0_URL
+              value: "http://process-0:5000"
+            - name: PROCESS_1_URL
+              value: "http://process-1:5000"
+            - name: PROCESS_2_URL
+              value: "http://process-2:5000"
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-0
+spec:
+  selector:
+    app: multicast
+    process: "0"
+  ports:
+    - port: 5000
+      targetPort: 5000
+  type: ClusterIP
+---
+# Deployment e Service para Processo 1
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-1
+  labels:
+    app: multicast
+    process: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multicast
+      process: "1"
+  template:
+    metadata:
+      labels:
+        app: multicast
+        process: "1"
+    spec:
+      containers:
+        - name: multicast
+          image: multicast-total-order:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PROCESS_ID
+              value: "1"
+            - name: PORT
+              value: "5000"
+            - name: NUM_PROCESSES
+              value: "3"
+            - name: DELAY_MODE
+              value: "false"
+            - name: PROCESS_0_URL
+              value: "http://process-0:5000"
+            - name: PROCESS_1_URL
+              value: "http://process-1:5000"
+            - name: PROCESS_2_URL
+              value: "http://process-2:5000"
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-1
+spec:
+  selector:
+    app: multicast
+    process: "1"
+  ports:
+    - port: 5000
+      targetPort: 5000
+  type: ClusterIP
+---
+# Deployment e Service para Processo 2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-2
+  labels:
+    app: multicast
+    process: "2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multicast
+      process: "2"
+  template:
+    metadata:
+      labels:
+        app: multicast
+        process: "2"
+    spec:
+      containers:
+        - name: multicast
+          image: multicast-total-order:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PROCESS_ID
+              value: "2"
+            - name: PORT
+              value: "5000"
+            - name: NUM_PROCESSES
+              value: "3"
+            - name: DELAY_MODE
+              value: "false"
+            - name: PROCESS_0_URL
+              value: "http://process-0:5000"
+            - name: PROCESS_1_URL
+              value: "http://process-1:5000"
+            - name: PROCESS_2_URL
+              value: "http://process-2:5000"
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "200m"
+            requests:
+              memory: "64Mi"
+              cpu: "100m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-2
+spec:
+  selector:
+    app: multicast
+    process: "2"
+  ports:
+    - port: 5000
+      targetPort: 5000
+  type: ClusterIP

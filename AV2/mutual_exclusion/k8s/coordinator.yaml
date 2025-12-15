@@ -1,0 +1,64 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: coordinator
+  namespace: mutual-exclusion
+  labels:
+    app: coordinator
+spec:
+  replicas: 1 # Apenas 1 coordenador (centralizado)
+  selector:
+    matchLabels:
+      app: coordinator
+  template:
+    metadata:
+      labels:
+        app: coordinator
+    spec:
+      containers:
+        - name: coordinator
+          image: mutual-exclusion-coordinator:latest
+          imagePullPolicy: Never # Usar imagem local do Minikube
+          ports:
+            - containerPort: 5000
+              name: http
+          env:
+            - name: PYTHONUNBUFFERED
+              value: "1"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: coordinator
+  namespace: mutual-exclusion
+  labels:
+    app: coordinator
+spec:
+  type: ClusterIP
+  selector:
+    app: coordinator
+  ports:
+    - port: 5000
+      targetPort: 5000
+      protocol: TCP
+      name: http

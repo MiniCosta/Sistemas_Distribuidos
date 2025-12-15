@@ -1,0 +1,162 @@
+# Deployment com DELAY ativado no Processo 1
+# Usar este arquivo para demonstrar o cenário de atraso
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-0
+  labels:
+    app: multicast-delay
+    process: "0"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multicast-delay
+      process: "0"
+  template:
+    metadata:
+      labels:
+        app: multicast-delay
+        process: "0"
+    spec:
+      containers:
+        - name: multicast
+          image: multicast-total-order:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PROCESS_ID
+              value: "0"
+            - name: NUM_PROCESSES
+              value: "3"
+            - name: DELAY_MODE
+              value: "false"
+            - name: PROCESS_0_URL
+              value: "http://process-0-delay:5000"
+            - name: PROCESS_1_URL
+              value: "http://process-1-delay:5000"
+            - name: PROCESS_2_URL
+              value: "http://process-2-delay:5000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-0-delay
+spec:
+  selector:
+    app: multicast-delay
+    process: "0"
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+# Processo 1 - COM DELAY ATIVADO
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-1-delay
+  labels:
+    app: multicast-delay
+    process: "1"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multicast-delay
+      process: "1"
+  template:
+    metadata:
+      labels:
+        app: multicast-delay
+        process: "1"
+    spec:
+      containers:
+        - name: multicast
+          image: multicast-total-order:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PROCESS_ID
+              value: "1"
+            - name: NUM_PROCESSES
+              value: "3"
+            - name: DELAY_MODE
+              value: "true" # ⚠️ DELAY ATIVADO
+            - name: DELAY_PROCESS
+              value: "1" # Este processo vai atrasar
+            - name: DELAY_MSG_ID
+              value: "" # Será definido na hora do teste
+            - name: DELAY_SECONDS
+              value: "10" # 10 segundos de atraso
+            - name: PROCESS_0_URL
+              value: "http://process-0-delay:5000"
+            - name: PROCESS_1_URL
+              value: "http://process-1-delay:5000"
+            - name: PROCESS_2_URL
+              value: "http://process-2-delay:5000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-1-delay
+spec:
+  selector:
+    app: multicast-delay
+    process: "1"
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+# Processo 2
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: process-2-delay
+  labels:
+    app: multicast-delay
+    process: "2"
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multicast-delay
+      process: "2"
+  template:
+    metadata:
+      labels:
+        app: multicast-delay
+        process: "2"
+    spec:
+      containers:
+        - name: multicast
+          image: multicast-total-order:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 5000
+          env:
+            - name: PROCESS_ID
+              value: "2"
+            - name: NUM_PROCESSES
+              value: "3"
+            - name: DELAY_MODE
+              value: "false"
+            - name: PROCESS_0_URL
+              value: "http://process-0-delay:5000"
+            - name: PROCESS_1_URL
+              value: "http://process-1-delay:5000"
+            - name: PROCESS_2_URL
+              value: "http://process-2-delay:5000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: process-2-delay
+spec:
+  selector:
+    app: multicast-delay
+    process: "2"
+  ports:
+    - port: 5000
+      targetPort: 5000
